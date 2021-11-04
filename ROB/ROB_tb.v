@@ -11,7 +11,7 @@ module ROB_tb;
 	wire head_ready, is_full, is_empty;
 
 	// Instantiate the module
-	ROB #(.SIZE(3)) dut (    
+	ROB #(.SIZE(10)) dut (    
         .clock(clock),
         .push(push),
         .pop(pop),
