@@ -75,7 +75,7 @@ module ROB #(parameter SIZE=32) (
             assign nextIterVals[i] = (match_list[i] & finish_instr) ? finish_val : (move_list[i] ? 32'd0 : currIterVals[i]);
             assign nextIterInstrs[i] = move_list[i] ? (nextIterFree[i] ? instr_in : 32'd0) : currIterInstrs[i];
             assign reset_list[i] = pop & currIterReady[i] & head_list[i];
-            assign wEn_list[i] = (push & !is_full) | match_list[i] | nextIterFree[i];
+            assign wEn_list[i] = push & (!is_full | match_list[i] | nextIterFree[i]);
         end
 
         triBuff instrBuff(.in(currIterInstrs[i]), .oe(head_list[i]), .out(head_instr));
