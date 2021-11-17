@@ -78,7 +78,7 @@ module ROB_tb;
 		end
 
 		// Get the input for the parameters from the input file
-		instrScan = $fscanf(instrFile, "%b,%b,%h,%b,%h,%h",
+		instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d",
 			push, pop, instr_in, finish_instr, instr_to_finish, finish_val);
 
 		if(instrScan != 6) begin
@@ -95,14 +95,14 @@ module ROB_tb;
 			@(negedge clock);
 
 			// Write the actual module outputs to the actual file
-			$fdisplay(actFile, "%b,%b,%h,%b,%h,%h,%h,%h,%b,%b,%b",
+			$fdisplay(actFile, "%b,%b,%d,%b,%d,%d,%d,%d,%b,%b,%b",
 				push, pop, instr_in, finish_instr, instr_to_finish, finish_val,
 				head_instr, head_val, head_ready, is_empty, is_full);
 			
 			tests = tests + 1;
 
 			// Get the input for the parameters from the input file
-			instrScan = $fscanf(instrFile, "%b,%b,%h,%b,%h,%h",
+			instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d",
 				push, pop, instr_in, finish_instr, instr_to_finish, finish_val);
 		end
 
