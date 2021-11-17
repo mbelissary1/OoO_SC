@@ -1,0 +1,6 @@
+./triBuff.v
+./Scoreboard_tb.v
+./Scoreboard.v
+./ScoreboardCell.v
+./register.v
+./dflipflop.v

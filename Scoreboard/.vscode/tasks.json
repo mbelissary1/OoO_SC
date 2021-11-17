@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Create FileList",
+            "type": "shell",
+            "command": "find . -name \"*.v\" > FileList.txt",
+            "presentation": {"echo": true, "reveal": "always", "focus": true, "panel": "shared", "showReuseMessage": false, "clear": true},
+        },
+        {
+            "label": "Compile Files",
+            "type": "shell",
+            "command": "iverilog -c FileList.txt -o test",
+            "presentation": {"echo": true, "reveal": "always", "focus": true, "panel": "shared", "showReuseMessage": false, "clear": true},
+            "dependsOn": "Create FileList"
+        },
+        {
+            "label": "Run Testbench",
+            "type": "shell",
+            "command": "ls tests/*_instr.csv | sed s/_instr.csv//g | xargs -I % -tn 1 vvp test +test=%",
+            "presentation": {"echo": true, "reveal": "always", "focus": true, "panel": "shared", "showReuseMessage": false, "clear": true},
+            "dependsOn": ["Compile Files"]
+        }
+    ]
+}
