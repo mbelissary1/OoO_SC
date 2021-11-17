@@ -4,7 +4,7 @@ module ROB #(parameter SIZE=32) (
         reset,
         push,
         pop,
-        finish_instr,
+        finishing_instr,
 
     output
         is_full,
@@ -13,6 +13,11 @@ module ROB #(parameter SIZE=32) (
     input[31:0] 
         instr_to_finish,
         finish_val,
+
+    input[31:0]
+        instr_to_flush,
+    input
+        flushing_instr,
 
     input[31:0] 
         instr_in, 
@@ -34,7 +39,9 @@ module ROB #(parameter SIZE=32) (
         match_list,
         head_list,
         reset_list,
-        wEn_list;
+        wEn_list,
+        flush_match_list,
+        flush_list;
 
     wire [SIZE-1:0]
         currIterReady,
@@ -55,24 +62,30 @@ module ROB #(parameter SIZE=32) (
         if (!i) begin
             assign head_list[i] = !free_list[i];
             assign move_list[i] = free_list[i] | |reset_list;
-            assign match_list[i] = |nextIterInstrs[i] & (instr_to_finish == nextIterInstrs[i]);
+            assign match_list[i] = finishing_instr & |nextIterInstrs[i] & (instr_to_finish == nextIterInstrs[i]);
+            assign flush_match_list[i] = |nextIterInstrs[i] & (instr_to_flush == nextIterInstrs[i]);
+            assign flush_list[i] = 1'b0;
+
         end else begin
             assign head_list[i] = ~|head_list[i-1:0] & !free_list[i];
             assign move_list[i] = |free_list[i-1:0] | |reset_list;
-            assign match_list[i] = ~|match_list[i-1:0] & |nextIterInstrs[i] & (instr_to_finish == nextIterInstrs[i]);
+            assign match_list[i] = finishing_instr & ~|match_list[i-1:0] & |nextIterInstrs[i] & (instr_to_finish == nextIterInstrs[i]);
+            assign flush_match_list[i] = ~|flush_match_list[i-1:0] & |nextIterInstrs[i] & (instr_to_flush == nextIterInstrs[i]);
+            assign flush_list[i] = |flush_match_list[i-1:0];
+
         end
 
        if (i != SIZE-1) begin
             assign nextIterFree[i] = move_list[i] ? free_list[i+1] : free_list[i];
-            assign nextIterReady[i] = (match_list[i] & finish_instr) | (move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterReady[i+1]) : currIterReady[i]);
-            assign nextIterVals[i] = (match_list[i] & finish_instr) ? finish_val : (move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterVals[i+1]) : currIterVals[i]);
+            assign nextIterReady[i] = (match_list[i] & finishing_instr) | (move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterReady[i+1]) : currIterReady[i]);
+            assign nextIterVals[i] = (match_list[i] & finishing_instr) ? finish_val : (move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterVals[i+1]) : currIterVals[i]);
             assign nextIterInstrs[i] = move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterInstrs[i+1]) : currIterInstrs[i];
             assign reset_list[i] = pop & currIterReady[i] & head_list[i];
             assign wEn_list[i] = 1'b1;
         end else begin
             assign nextIterFree[i] = move_list[i] ? 1'b1 : free_list[i];
-            assign nextIterReady[i] = move_list[i] ? 1'b0 : ((match_list[i] & finish_instr) | currIterReady[i]);
-            assign nextIterVals[i] = (match_list[i] & finish_instr) ? finish_val : (move_list[i] ? 32'd0 : currIterVals[i]);
+            assign nextIterReady[i] = move_list[i] ? 1'b0 : ((match_list[i] & finishing_instr) | currIterReady[i]);
+            assign nextIterVals[i] = (match_list[i] & finishing_instr) ? finish_val : (move_list[i] ? 32'd0 : currIterVals[i]);
             assign nextIterInstrs[i] = move_list[i] ? (nextIterFree[i] ? instr_in : 32'd0) : currIterInstrs[i];
             assign reset_list[i] = pop & currIterReady[i] & head_list[i];
             assign wEn_list[i] = 1'b1;
@@ -85,7 +98,7 @@ module ROB #(parameter SIZE=32) (
         BufferCell myCell(
             .clock(clock), 
             .reset_async(reset), 
-            .reset_sync(1'b0),
+            .reset_sync(flush_list[i]),
             
             .ready_in(nextIterReady[i]),
 

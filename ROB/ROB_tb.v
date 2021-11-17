@@ -2,9 +2,9 @@
 module ROB_tb;
 
 	// Module Inputs
-	reg clock = 0, push = 0, pop = 0, finish_instr = 0;
+	reg clock = 0, push = 0, pop = 0, finishing_instr = 0, flushing_instr = 0;
 	reg[31:0] instr_to_finish = 0,
-			 finish_val = 0, instr_in = 0; 
+			 finish_val = 0, instr_in = 0, instr_to_flush = 0; 
 
 	// Module outputs
 	wire[31:0] head_instr, head_val;
@@ -15,7 +15,7 @@ module ROB_tb;
         .clock(clock),
         .push(push),
         .pop(pop),
-        .finish_instr(finish_instr),
+        .finishing_instr(finishing_instr),
 		.reset(1'b0),
 
         .is_full(is_full),
@@ -23,6 +23,9 @@ module ROB_tb;
 
         .instr_to_finish(instr_to_finish),
         .finish_val(finish_val),
+
+        .instr_to_flush(instr_to_flush),
+        .flushing_instr(flushing_instr),
 
         .instr_in(instr_in), 
         .head_instr(head_instr),
@@ -69,8 +72,8 @@ module ROB_tb;
 		$fdisplay(actFile, "Head Instruction, Head Value, Head Ready, Empty, Full");
 
 		// Ignore the header of the instrected file
-		instrScan = $fscanf(instrFile, "%s,%s,%s,%s,%s,%s", 
-			push, pop, instr_in, finish_instr, instr_to_finish, finish_val);
+		instrScan = $fscanf(instrFile, "%s,%s,%s,%s,%s,%s,%s,%s", 
+			push, pop, instr_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush);
 
 		if(instrScan == 0) begin
 			$display("Error reading the %0s file.\nMake sure there are no spaces ANYWHERE in your file.\nYou can check by opening it in a text editor.", instrFileName);
@@ -78,10 +81,10 @@ module ROB_tb;
 		end
 
 		// Get the input for the parameters from the input file
-		instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d",
-			push, pop, instr_in, finish_instr, instr_to_finish, finish_val);
+		instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d,%b,%d",
+			push, pop, instr_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush);
 
-		if(instrScan != 6) begin
+		if(instrScan != 8) begin
 			$display("Error reading %0s\nMake sure there are no spaces ANYWHERE in your file.\nYou can check by opening it in a text editor.", instrFileName);
 			$finish;
 		end
@@ -90,20 +93,20 @@ module ROB_tb;
 		$dumpvars(0, ROB_tb);
 
 		// Iterate until reaching the end of the file
-		while(instrScan == 6) begin
+		while(instrScan == 8) begin
 
 			@(negedge clock);
 
 			// Write the actual module outputs to the actual file
 			$fdisplay(actFile, "%b,%b,%d,%b,%d,%d,%d,%d,%b,%b,%b",
-				push, pop, instr_in, finish_instr, instr_to_finish, finish_val,
+				push, pop, instr_in, finishing_instr, instr_to_finish, finish_val,
 				head_instr, head_val, head_ready, is_empty, is_full);
 			
 			tests = tests + 1;
 
 			// Get the input for the parameters from the input file
-			instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d",
-				push, pop, instr_in, finish_instr, instr_to_finish, finish_val);
+			instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d,%b,%d",
+				push, pop, instr_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush);
 		end
 
 		if (instrScan > 0) begin
