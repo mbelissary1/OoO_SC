@@ -2,6 +2,7 @@
 
 import random
 import numpy as np
+import sys
 
 # Initialize lists to hold the different kind of instructions
 R_Type = ["add", "sub", "and", "or", "sll", "sra"]
@@ -13,7 +14,7 @@ JII_Type = ["jr"]
 All_Insn = ["add", "sub", "and", "or", "sll", "sra", "addi", "sw", "lw", "blt", "bne", "j", "jal", "bex", "setx", "jr"]
 
 # Initalize variables for number of instructions and list of full instructions
-insn_num = 100
+insn_num = int(sys.argv[1])
 i = 0
 insn_list = []
 #              add      sub      and     or     sll     sra    addi    sw    lw   blt  bne     j     jal
@@ -37,8 +38,11 @@ while i < insn_num:
             insnToAdd = insnToAdd + " $r" + str(random.choice(range(0, 32))) + ","
 
             # Set the string have have an $rt register if an R Type
-            if insnType in R_Type:
+            if insnType in R_Type and insnType != "sra" and insnType != "sll":
                 insnToAdd = insnToAdd + " $r" + str(random.choice(range(0, 32)))
+
+            elif insnType == "sra" or insnType == "sll":
+                insnToAdd = insnToAdd + " " + str(random.choice(range(0, 32)))
 
             # Set the string to have the branching target
             elif insnType in Branch_Type:
