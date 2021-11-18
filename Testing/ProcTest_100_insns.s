@@ -1,101 +1,101 @@
 .text
-sub $r18, $r17, $r14
-add $r29, $r22, $r3
-jal 24
-j 79
-jr $r8,
-blt $r19, $r31, 79
-sub $r25, $r31, $r12
-sw $r13, 211646($r19)
-jal 39
-sll $r1, $r28, $r21
-sll $r19, $r21, $r11
-sw $r30, 434939($r3)
-sub $r17, $r25, $r28
-j 57
-lw $r1, 268918($r2)
-blt $r19, $r15, 97
-sra $r15, $r29, $r18
-bne $r6, $r11, 99
-add $r21, $r21, $r5
-jr $r20,
-j 57
-j 87
-or $r14, $r7, $r16
-sub $r7, $r20, $r15
-sw $r27, 527857($r9)
-sw $r13, 210308($r15)
-sub $r0, $r11, $r19
-lw $r5, 380178($r22)
-bne $r4, $r10, 80
-lw $r11, 148926($r0)
-sra $r8, $r1, $r14
-add $r1, $r8, $r20
-add $r0, $r29, $r24
-sra $r21, $r9, $r24
-blt $r30, $r26, 62
-sll $r14, $r2, $r0
-or $r27, $r31, $r5
-blt $r15, $r14, 14
-blt $r9, $r7, 35
-sw $r30, 982594($r15)
-or $r9, $r0, $r31
-bne $r19, $r19, 89
-sll $r27, $r29, $r17
-jal 89
-bne $r30, $r26, 69
-j 72
-or $r9, $r1, $r0
-jal 62
-sra $r11, $r18, $r21
-jr $r10,
-sw $r5, 829558($r9)
-j 80
-jal 68
-blt $r0, $r15, 11
-sw $r16, 193118($r25)
-jal 99
-blt $r30, $r28, 98
-sub $r10, $r27, $r25
-sw $r30, 877146($r8)
-add $r31, $r3, $r7
-jr $r6,
-j 83
-sll $r1, $r30, $r5
-sw $r22, 921517($r13)
-lw $r31, 699374($r1)
-sra $r24, $r24, $r31
-sll $r27, $r11, $r14
-blt $r24, $r6, 35
-sub $r28, $r0, $r22
-bne $r9, $r25, 97
-lw $r31, 525431($r11)
-lw $r4, 734183($r27)
-setx 41
-or $r26, $r13, $r29
-addi $r17, $r27, 72944
-addi $r30, $r18, 734401
-bne $r13, $r28, 37
-and $r7, $r17, $r16
-lw $r11, 127412($r20)
-sub $r21, $r10, $r23
-sub $r4, $r16, $r9
-bne $r20, $r29, 61
-sra $r24, $r4, $r2
-lw $r8, 295530($r16)
-sub $r28, $r22, $r16
-sw $r22, 806580($r30)
-addi $r0, $r22, 37722
-blt $r4, $r17, 41
-lw $r26, 1223($r8)
-add $r12, $r0, $r27
-sra $r8, $r13, $r24
-and $r0, $r26, $r21
-and $r5, $r4, $r27
-sw $r2, 322162($r31)
-lw $r23, 658021($r9)
-sw $r7, 883117($r20)
-addi $r7, $r9, 796361
-sll $r8, $r25, $r29
-jr $r23,
-jr $r20,
+blt $r13, $r22, 94
+lw $r4, 32130($r12)
+sll $r17, $r7, $r1
+bne $r22, $r28, 11
+or $r1, $r1, $r23
+bne $r15, $r26, 11
+lw $r31, 689168($r15)
+blt $r2, $r1, 77
+jal 15
+bne $r15, $r10, 87
+sw $r13, 77593($r15)
+and $r24, $r5, $r30
+sra $r1, $r2, $r9
+add $r9, $r20, $r23
+and $r27, $r30, $r20
+sw $r14, 507552($r9)
+lw $r5, 187608($r10)
+jr $r29,
+j 24
+jr $r19,
+blt $r3, $r8, 26
+sw $r0, 286582($r17)
+blt $r22, $r21, 40
+sw $r6, 666568($r23)
+and $r3, $r6, $r22
+sll $r17, $r25, $r12
+sra $r26, $r0, $r21
+sll $r29, $r25, $r12
+bne $r12, $r30, 71
+jal 81
+add $r8, $r26, $r31
+lw $r13, 574580($r17)
+blt $r26, $r12, 41
+jr $r24,
+bne $r9, $r1, 81
+or $r0, $r19, $r25
+sw $r15, 42520($r6)
+and $r25, $r21, $r9
+j 55
+blt $r15, $r21, 90
+and $r5, $r8, $r19
+lw $r0, 872778($r24)
+jal 70
+lw $r10, 747977($r5)
+lw $r17, 981616($r6)
+and $r6, $r16, $r10
+jal 58
+bne $r7, $r14, 67
+bex 49
+lw $r14, 611575($r29)
+and $r17, $r17, $r27
+addi $r8, $r4, 923383
+jal 66
+bne $r12, $r20, 37
+sll $r2, $r6, $r0
+lw $r9, 792184($r25)
+addi $r26, $r25, 417681
+sub $r29, $r24, $r15
+sw $r13, 841229($r26)
+blt $r27, $r0, 60
+sub $r9, $r25, $r27
+add $r12, $r19, $r0
+lw $r9, 942920($r14)
+sw $r23, 961409($r2)
+sub $r19, $r24, $r21
+jal 80
+and $r20, $r9, $r18
+j 92
+add $r20, $r29, $r28
+add $r13, $r30, $r24
+blt $r9, $r9, 30
+blt $r20, $r26, 3
+or $r28, $r10, $r20
+and $r12, $r18, $r15
+jr $r4,
+sll $r4, $r19, $r23
+and $r11, $r24, $r4
+blt $r27, $r2, 48
+lw $r3, 621953($r8)
+bne $r21, $r9, 16
+sll $r27, $r0, $r30
+lw $r31, 230055($r27)
+jal 91
+j 99
+bne $r21, $r23, 90
+lw $r7, 350890($r11)
+lw $r25, 437749($r16)
+bne $r2, $r7, 77
+jr $r21,
+addi $r2, $r24, 143236
+or $r5, $r9, $r16
+addi $r18, $r20, 394915
+blt $r26, $r20, 41
+lw $r5, 591652($r1)
+lw $r23, 427292($r26)
+blt $r12, $r15, 62
+sll $r15, $r9, $r22
+sub $r19, $r5, $r28
+lw $r15, 981274($r14)
+addi $r6, $r20, 954725
