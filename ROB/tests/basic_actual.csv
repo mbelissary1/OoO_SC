@@ -1,0 +1,6 @@
+push, pop, instr_in, finishing_instr, instr_to_finish, finish_val,head_instr, head_val, head_ready, is_empty, is_full
+1,0,         0,0,         0,         0,         0,         0,0,1,0
+1,0,         1,0,         0,         0,         1,         0,0,0,0
+1,0,         2,0,         0,         0,         1,         0,0,0,0
+1,0,         3,0,         0,         0,         1,         0,0,0,0
+1,0,         4,0,         0,         0,         1,         0,0,0,0
