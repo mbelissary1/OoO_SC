@@ -1,4 +1,4 @@
-module ROB #(parameter SIZE=32) (
+module ROB #(parameter SIZE=32, NUM_BYPASS=4) (
     input 
         clock,
         reset,
@@ -19,8 +19,22 @@ module ROB #(parameter SIZE=32) (
     input
         flushing_instr,
 
-    input[31:0] 
+    input[31:0]
         instr_in, 
+    input[4:0]
+        rd_in,
+
+    input[4:0]
+        rd_search_0,
+        rd_search_1,
+        rd_search_2,
+        rd_search_3,
+    
+    output[31:0]
+        bypass_val_0,
+        bypass_val_1,
+        bypass_val_2,
+        bypass_val_3,
         
     output[31:0]
         head_instr,
@@ -29,90 +43,134 @@ module ROB #(parameter SIZE=32) (
     output
         head_ready);
 
-
-    wire[SIZE-1:0] free_list;
-    assign is_full = ~|free_list & ~|reset_list;
-    assign is_empty = &free_list;
-
     wire[SIZE-1:0] 
         move_list,
-        match_list,
+        free_list,
+        ready_list,
         head_list,
         reset_list,
-        wEn_list,
+        finish_match_list,
         flush_match_list,
-        flush_list;
+        flush_list,
+        finish_list,
+        bypass_match_list[NUM_BYPASS-1:0];
 
-    wire [SIZE-1:0]
-        currIterReady,
-        nextIterReady,
-        nextIterFree;
-        
+    assign is_full = ~|free_list;
+    assign is_empty = &free_list;
+    
     wire [31:0]
-        currIterVals[SIZE-1:0],
-        nextIterVals[SIZE-1:0],
-        currIterInstrs[SIZE-1:0],
-        nextIterInstrs[SIZE-1:0];
+        instrs[SIZE-1:0],
+        vals[SIZE-1:0];
+    
+    wire [4:0]
+        rds[SIZE-1:0];
 
-    genvar i;
+    wire wEn = 1'b1;
+
+    wire[31:0] bypass_vals[NUM_BYPASS-1:0];
+    assign bypass_val_0 = bypass_vals[0];
+    assign bypass_val_1 = bypass_vals[1];
+    assign bypass_val_2 = bypass_vals[2];
+    assign bypass_val_3 = bypass_vals[3];
+
+    wire[4:0] rd_searches[NUM_BYPASS-1:0];
+    assign rd_searches[0] = rd_search_0;
+    assign rd_searches[1] = rd_search_1;
+    assign rd_searches[2] = rd_search_2;
+    assign rd_searches[3] = rd_search_3;
+
+    genvar i, j;
     for (i=0; i < SIZE; i=i+1) begin
 
-        wire[31:0] currInstr = currIterInstrs[i];
+        assign flush_match_list[i] = (instrs[i] == instr_to_flush) & flushing_instr;
+        assign finish_match_list[i] = (instr_to_finish == instrs[i]) & finishing_instr & |instrs[i];
 
-        if (!i) begin
+        // The First Cell 
+        if(!i) begin
+            assign move_list[i] = 0;
             assign head_list[i] = !free_list[i];
-            assign move_list[i] = free_list[i] | |reset_list;
-            assign match_list[i] = finishing_instr & |nextIterInstrs[i] & (instr_to_finish == nextIterInstrs[i]);
-            assign flush_match_list[i] = |nextIterInstrs[i] & (instr_to_flush == nextIterInstrs[i]);
             assign flush_list[i] = 1'b0;
-
         end else begin
-            assign head_list[i] = ~|head_list[i-1:0] & !free_list[i];
-            assign move_list[i] = |free_list[i-1:0] | |reset_list;
-            assign match_list[i] = finishing_instr & ~|match_list[i-1:0] & |nextIterInstrs[i] & (instr_to_finish == nextIterInstrs[i]);
-            assign flush_match_list[i] = ~|flush_match_list[i-1:0] & |nextIterInstrs[i] & (instr_to_flush == nextIterInstrs[i]);
-            assign flush_list[i] = |flush_match_list[i-1:0];
-
+            assign move_list[i] = |free_list[i-1:0]; 
+            assign head_list[i] = !free_list[i] & ~|head_list[i-1:0];
+            assign flush_list[i] = (|flush_match_list[i-1:0] | (flush_match_list[i] & move_list[i])) & flushing_instr;
         end
 
-       if (i != SIZE-1) begin
-            assign nextIterFree[i] = move_list[i] ? free_list[i+1] : free_list[i];
-            assign nextIterReady[i] = (match_list[i] & finishing_instr) | (move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterReady[i+1]) : currIterReady[i]);
-            assign nextIterVals[i] = (match_list[i] & finishing_instr) ? finish_val : (move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterVals[i+1]) : currIterVals[i]);
-            assign nextIterInstrs[i] = move_list[i] ? (reset_list[i+1] ? 32'd0 : currIterInstrs[i+1]) : currIterInstrs[i];
-            assign reset_list[i] = pop & currIterReady[i] & head_list[i];
-            assign wEn_list[i] = 1'b1;
+        // All but the last cell
+        if (i<SIZE-1) begin
+
+            assign reset_list[i] = (pop & ((head_list[i] & !move_list[i] & ready_list[i]) | (head_list[i+1] & move_list[i+1] & ready_list[i+1]))) | flush_list[i];
+            assign finish_list[i] = (move_list[i] | move_list[i+1]) ? finish_match_list[i+1] : finish_match_list[i];
+
+            for (j=0; j < NUM_BYPASS; j=j+1) begin
+                assign bypass_match_list[j][i] = (rds[i] == rd_searches[j]) & ~|bypass_match_list[j][SIZE-1:i+1] & ready_list[i];
+            end
+
+            BufferCell myCell(
+                .clock(clock),
+                .wEn(wEn),
+                .reset_sync(reset_list[i]),
+                .reset_async(reset),
+
+                .can_move(move_list[i]),
+                .free(free_list[i]),
+                .just_finished(finish_list[i]),
+
+                .instr_in(instrs[i+1]),
+                .ready_in(finish_list[i] | ready_list[i+1]),
+                .val_in(finish_list[i] ? finish_val : vals[i+1]),
+                .rd_in(rds[i+1]),
+
+                .instr_out(instrs[i]),
+                .ready_out(ready_list[i]),
+                .val_out(vals[i]),
+                .rd_out(rds[i])
+            );
+
         end else begin
-            assign nextIterFree[i] = move_list[i] ? 1'b1 : free_list[i];
-            assign nextIterReady[i] = move_list[i] ? 1'b0 : ((match_list[i] & finishing_instr) | currIterReady[i]);
-            assign nextIterVals[i] = (match_list[i] & finishing_instr) ? finish_val : (move_list[i] ? 32'd0 : currIterVals[i]);
-            assign nextIterInstrs[i] = move_list[i] ? (nextIterFree[i] ? instr_in : 32'd0) : currIterInstrs[i];
-            assign reset_list[i] = pop & currIterReady[i] & head_list[i];
-            assign wEn_list[i] = 1'b1;
+
+            for (j=0; j < NUM_BYPASS; j=j+1) begin
+                assign bypass_match_list[j][i] = rds[i] == rd_searches[j] & ready_list[i];
+            end
+
+            assign reset_list[i] = (pop & head_list[i] & !move_list[i] & ready_list[i]) | flush_list[i];
+            assign finish_list[i] = !move_list[i] & finish_match_list[i];
+
+            BufferCell myCell(
+                .clock(clock),
+                .wEn(wEn),
+                .reset_sync(reset_list[i]),
+                .reset_async(reset),
+
+                .can_move(move_list[i]),
+                .free(free_list[i]),
+                .just_finished(finish_list[i]),
+
+                .instr_in((!is_full & push) ? instr_in : 5'b0),
+                .ready_in((!is_full & push) ? 1'b0 : finish_list[i]),
+                .rd_in((!is_full & push) ? rd_in : 5'b0),
+                .val_in((!is_full & push) ? 32'b0 : (finish_list[i] ? finish_val : vals[i])),
+
+                .instr_out(instrs[i]),
+                .ready_out(ready_list[i]), 
+                .val_out(vals[i]),
+                .rd_out(rds[i])
+            );
         end
 
-        triBuff instrBuff(.in(currIterInstrs[i]), .oe(head_list[i]), .out(head_instr));
-        triBuff valBuff(.in(currIterVals[i]), .oe(head_list[i]), .out(head_val));
-        triBuff  #(.SIZE(1)) readyBuff(.in(currIterReady[i]), .oe(head_list[i]), .out(head_ready));
+        for (j=0; j < NUM_BYPASS; j=j+1) begin
+            triBuff bypassBuff(.in(vals[i]), .oe(bypass_match_list[j][i]), .out(bypass_vals[j]));
+        end
 
-        BufferCell myCell(
-            .clock(clock), 
-            .reset_async(reset), 
-            .reset_sync(flush_list[i]),
-            
-            .ready_in(nextIterReady[i]),
-
-            .wEn(wEn_list[i]), 
-            .inInstr(nextIterInstrs[i]),
-            .inVal(nextIterVals[i]),
-
-            .free(free_list[i]),
-            .outReady(currIterReady[i]),
-
-            .outInstr(currIterInstrs[i]),
-            .outVal(currIterVals[i]));
+        triBuff instrBuff(.in(instrs[i]), .oe(head_list[i]), .out(head_instr));
+        triBuff valBuff(.in(vals[i]), .oe(head_list[i]), .out(head_val));
+        triBuff #(.SIZE(1)) ReadyBuff(.in(ready_list[i]), .oe(head_list[i]), .out(head_ready));
     end
 
+    for (j=0; j < NUM_BYPASS; j=j+1) begin
+        wire[SIZE-1:0] bypass_match = bypass_match_list[j];
+        triBuff defBypassBuff(.in(32'b0), .oe(~|bypass_match_list[j]), .out(bypass_vals[j]));
+    end
     triBuff defInstrBuff(.in(32'b0), .oe(~|head_list), .out(head_instr));
     triBuff defValBuff(.in(32'b0), .oe(~|head_list), .out(head_val));
     triBuff  #(.SIZE(1)) defReadyBuff(.in(1'b0), .oe(~|head_list), .out(head_ready));

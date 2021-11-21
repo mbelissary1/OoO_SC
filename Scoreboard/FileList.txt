@@ -4,3 +4,4 @@
 ./ScoreboardCell.v
 ./register.v
 ./dflipflop.v
+./IsMulticycle.v

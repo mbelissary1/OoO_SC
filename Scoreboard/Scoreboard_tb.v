@@ -2,7 +2,7 @@
 module Scoreboard_tb;
 
 	// Module Inputs
-	reg clock = 0, push = 0, pop = 0, committing_instr = 0, flushing_instr = 0;
+	reg clock = 0, reset = 0, push = 0, pop = 0, committing_instr = 0, flushing_instr = 0;
 	reg[4:0] rd_in = 0, rs1_in = 0, rs2_in = 0;
 	reg[31:0] instr_to_finish = 0,
 			 finish_val = 0, instr_in = 0, instr_to_flush = 0; 

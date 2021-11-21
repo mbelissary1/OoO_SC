@@ -10,14 +10,14 @@
         {
             "label": "Compile Files",
             "type": "shell",
-            "command": "iverilog -c FileList.txt -o test -s ROB_tb",
+            "command": "iverilog -Wimplicit -c FileList.txt -o test -s ROB_tb",
             "presentation": {"echo": true, "reveal": "always", "focus": true, "panel": "shared", "showReuseMessage": false, "clear": true},
             "dependsOn": "Create FileList"
         },
         {
             "label": "Run Testbench",
             "type": "shell",
-            "command": "ls *_instr.csv | sed s/_instr.csv//g | xargs -I % -tn 1 vvp test +test=%",
+            "command": "ls tests/*_instr.csv | sed s/_instr.csv//g | xargs -I % -tn 1 vvp test +test=%",
             "presentation": {"echo": true, "reveal": "always", "focus": true, "panel": "shared", "showReuseMessage": false, "clear": true},
             "dependsOn": ["Compile Files"]
         }

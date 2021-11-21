@@ -3,12 +3,18 @@ module ROB_tb;
 
 	// Module Inputs
 	reg clock = 0, push = 0, pop = 0, finishing_instr = 0, flushing_instr = 0;
+	reg[4:0] rd_in = 0, rd_search_0 = 0, rd_search_1 = 0, rd_search_2 = 0, rd_search_3 = 0;
 	reg[31:0] instr_to_finish = 0,
 			 finish_val = 0, instr_in = 0, instr_to_flush = 0; 
 
 	// Module outputs
 	wire[31:0] head_instr, head_val;
 	wire head_ready, is_full, is_empty;
+	wire [31:0]
+        bypass_val_0,
+        bypass_val_1,
+        bypass_val_2,
+        bypass_val_3;
 
 	// Instantiate the module
 	ROB #(.SIZE(10)) dut (    
@@ -28,12 +34,24 @@ module ROB_tb;
         .flushing_instr(flushing_instr),
 
         .instr_in(instr_in), 
+		.rd_in(rd_in),
+
+        .rd_search_0(rd_search_0),
+        .rd_search_1(rd_search_1),
+        .rd_search_2(rd_search_2),
+        .rd_search_3(rd_search_3),
+    
+        .bypass_val_0(bypass_val_0),
+        .bypass_val_1(bypass_val_1),
+        .bypass_val_2(bypass_val_2),
+        .bypass_val_3(bypass_val_3),
+
         .head_instr(head_instr),
         .head_val(head_val),
         .head_ready(head_ready));
 
 	// Initialize our strings
-	reg[255:0] instrFileName, actFileName, testName;
+	reg[1023:0] instrFileName, actFileName, testName;
 
 	// Where to store file error codes
 	integer 	paramFile, 	   instrFile,		diffFile, 	  actFile,
@@ -69,11 +87,11 @@ module ROB_tb;
 		actFile   = $fopen(actFileName,   "w");
 
 		// Add the headers to the Actual and Difference files
-		$fdisplay(actFile, "Head Instruction, Head Value, Head Ready, Empty, Full");
+		$fdisplay(actFile, "push, pop, instr_in, finishing_instr, instr_to_finish, finish_val,head_instr, head_val, head_ready, is_empty, is_full");
 
 		// Ignore the header of the instrected file
-		instrScan = $fscanf(instrFile, "%s,%s,%s,%s,%s,%s,%s,%s", 
-			push, pop, instr_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush);
+		instrScan = $fscanf(instrFile, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", 
+			push, pop, instr_in, rd_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush, rd_search_0, rd_search_1, rd_search_2, rd_search_3);
 
 		if(instrScan == 0) begin
 			$display("Error reading the %0s file.\nMake sure there are no spaces ANYWHERE in your file.\nYou can check by opening it in a text editor.", instrFileName);
@@ -81,10 +99,10 @@ module ROB_tb;
 		end
 
 		// Get the input for the parameters from the input file
-		instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d,%b,%d",
-			push, pop, instr_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush);
+		instrScan = $fscanf(instrFile, "%b,%b,%d,%d,%b,%d,%d,%b,%d,%d,%d,%d,%d",
+			push, pop, instr_in, rd_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush, rd_search_0, rd_search_1, rd_search_2, rd_search_3);
 
-		if(instrScan != 8) begin
+		if(instrScan != 13) begin
 			$display("Error reading %0s\nMake sure there are no spaces ANYWHERE in your file.\nYou can check by opening it in a text editor.", instrFileName);
 			$finish;
 		end
@@ -93,7 +111,7 @@ module ROB_tb;
 		$dumpvars(0, ROB_tb);
 
 		// Iterate until reaching the end of the file
-		while(instrScan == 8) begin
+		while(instrScan == 13) begin
 
 			@(negedge clock);
 
@@ -105,8 +123,8 @@ module ROB_tb;
 			tests = tests + 1;
 
 			// Get the input for the parameters from the input file
-			instrScan = $fscanf(instrFile, "%b,%b,%d,%b,%d,%d,%b,%d",
-				push, pop, instr_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush);
+			instrScan = $fscanf(instrFile, "%b,%b,%d,%d,%b,%d,%d,%b,%d,%d,%d,%d,%d",
+				push, pop, instr_in, rd_in, finishing_instr, instr_to_finish, finish_val, flushing_instr, instr_to_flush, rd_search_0, rd_search_1, rd_search_2, rd_search_3);
 		end
 
 		if (instrScan > 0) begin
@@ -119,8 +137,6 @@ module ROB_tb;
 		$fclose(actFile);
 
 		$display("DONE\n");
-
-		#100;
 		$finish;
 	end
 
