@@ -38,7 +38,7 @@ module ScoreboardCell (
 
     assign free = ~|instr_out;
 
-    dflipflop runningFlop(.q(running), .d(((can_move ? running_in : running) | start) & !reset_sync), .clk(clock), .en(wEn | reset_sync), .clr(reset_async));
+    dflipflop runningFlop(.q(running), .d((((can_move | free) ? running_in : running) | start) & !reset_sync), .clk(clock), .en(wEn | reset_sync), .clr(reset_async));
   
     register instrReg(.in(reset_sync ? 32'd0 : ((can_move | free) ? instr_in : instr_out)), .en(wEn | reset_sync), .clk(clock), .clr(reset_async), .out(instr_out));
     register pcReg(.in(reset_sync ? 32'd0 : ((can_move | free) ? pc_in : pc_out)), .en(wEn | reset_sync), .clk(clock), .clr(reset_async), .out(pc_out));

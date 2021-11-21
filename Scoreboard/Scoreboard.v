@@ -12,6 +12,7 @@ module Scoreboard #(parameter SIZE=32) (
 
     input[31:0]
         instr_to_finish,
+        lsq_head,
 
     input[31:0]
         instr_to_flush,
@@ -44,7 +45,8 @@ module Scoreboard #(parameter SIZE=32) (
         flush_list,
         running_list,
         start_list,
-        multicycle_list;
+        multicycle_list,
+        mem_list;
 
     assign is_full = ~|free_list;
     assign is_empty = &free_list;
@@ -67,7 +69,7 @@ module Scoreboard #(parameter SIZE=32) (
 
         assign flush_match_list[i] = (instrs[i] == instr_to_flush) & flushing_instr;
         assign finish_match_list[i] = (instr_to_finish == instrs[i]) & committing_instr;
-        IsMulticycle instrChecker(instrs[i], multicycle_list[i]);
+        IsMulticycle instrChecker(instrs[i], multicycle_list[i], mem_list[i]);
 
         // The First Cell 
         if(!i) begin
@@ -84,7 +86,7 @@ module Scoreboard #(parameter SIZE=32) (
                 assign rs1_match_list[j] = (rs1s[i] == rds[j]) & (!running_list[j] | multicycle_list[j]);
                 assign rs2_match_list[j] = (rs2s[i] == rds[j]) & (!running_list[j] | multicycle_list[j]);
             end
-            assign ready_list[i] = (~|rs1_match_list & ~|rs2_match_list & !free_list[i]);
+            assign ready_list[i] = (~|rs1_match_list & ~|rs2_match_list & !free_list[i]) & (!mem_list[i] | lsq_head == instrs[i]);
             assign head_list[i] = !running_list[i] & ready_list[i] & ~|head_list[i-1:0];
             assign flush_list[i] = (|flush_match_list[i-1:0] 
                                     | (flush_match_list[i] & move_list[i])) 
