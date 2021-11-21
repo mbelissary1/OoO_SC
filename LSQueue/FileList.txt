@@ -1,0 +1,6 @@
+./triBuff.v
+./register.v
+./dflipflop.v
+./LSCell.v
+./LSQueue.v
+./LSQueue_tb.v
