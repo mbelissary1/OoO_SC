@@ -10,8 +10,7 @@ mul $r1, $r2, $r3
 div $r4, $r5, $r6
 sw $r7, 10($r8)
 lw $r9, 5($r10)
-j 15
-bne $r0, $r1, 16
+bne $r0, $r1, 5
 j 17
 jal 18
 bex 18

@@ -58,7 +58,9 @@ while i < len(opcode):
                 cur_asm_line = split_asm_file[i + 1].split(" ")
                 target = cur_asm_line[4]
                 i = int(target) - 1
+                print("Branch taken! Branching to index " + str(i))
             else: # If the branch is *NOT* taken (40% because, well, math...)
+                print("Branch not taken!")
                 cycles_to_complete += 1
                 i += 1
     elif "j" in cur_opcode: # j, jal, jr...
@@ -66,9 +68,7 @@ while i < len(opcode):
         cur_asm_line = split_asm_file[i + 1].split(" ")
         target = cur_asm_line[2]
         i = int(target) - 1
-        print("target: " + str(i))
     else: 
         cycles_to_complete += insn_dict[cur_opcode]
         i += 1
-    print(cur_opcode)
-    print(cycles_to_complete)
+print("Cycles to complete execution: " + str(cycles_to_complete))
