@@ -63,7 +63,7 @@ while i < insn_num:
 
         #Set string to have downward jumps and bex's w/ proper formating
         else:
-            insnToAdd = insnType + " " + str(random.choice(range(i+1, insn_num+1)))
+            insnToAdd = insnType + " " + str(random.choice(range(min(insn_num, i+10), min(insn_num, i+20))))
     insn_list.append(insnToAdd)
     i += 1
 
