@@ -10,7 +10,7 @@ module RAM #( parameter DATA_WIDTH = 32, ADDRESS_WIDTH = 12, DEPTH = 4096, MEMFI
     
     initial begin
         if(MEMFILE > 0) begin
-            $readmemb(MEMFILE, MemoryArray);
+            $readmemh(MEMFILE, MemoryArray);
         end
     end
     

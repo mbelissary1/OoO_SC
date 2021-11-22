@@ -114,6 +114,8 @@ module processor(
     // Wires for Bypassing in XM
     wire bypassData, noBypassM;
 
+    wire isLoadInMemory;
+
     // Wires for dmem
     wire [31:0] memOut;
 
@@ -141,7 +143,7 @@ module processor(
 
 
     // Stall if a MULT or a DIV instruction is currently running or if the $rd of a LW is being used as an input in the next cycle
-    assign stallFD = (multDivOngoing | wxStall) ? 1'b0 : 1'b1;
+    assign stallFD = (multDivOngoing | wxStall | (!longInstrRDY && isLoadInMemory)) ? 1'b0 : 1'b1;
 
     // No-Op if a jump/branch instruction is currently running
     assign instrInFD = (isJumping | branchTaken) ? 32'b0 : q_imem;
@@ -174,7 +176,7 @@ module processor(
 
 
     // Stall if a MULT or a DIV instruction is currently running
-    assign stallDX = multDivOngoing ? 1'b0 : 1'b1;
+    assign stallDX = (multDivOngoing | (!longInstrRDY && isLoadInMemory))  ? 1'b0 : 1'b1;
 
     // No-Op if a jump/branch instruction is currently running or if the $rd of a LW is being used as an input in the next cycle
     assign instrInDX = (isJumping | branchTaken | wxStall) ? 32'b0 : instrOutFD;
@@ -330,14 +332,20 @@ module processor(
 
 
     // Stall if a MULT or a DIV instruction is currently running
-    assign stallXM = multDivOngoing ? 1'b0 : 1'b1;
+    assign stallXM = (multDivOngoing | (!longInstrRDY && isLoadInMemory)) ? 1'b0 : 1'b1;
 
     // Execute/Memory Register
     XM executeMemory(instrChange, data_result, rtDataBy, instrOutXM, address_dmem, rdDataOut, clock, stallXM, reset);
 
     // Access memory for loads and stores
+    assign isLoadInMemory = instrOutXM[31:27] == 5'b01000;
+    wire longInstrRDY;
+    wire[31:0] longInstr;
+
     assign isStore = instrOutXM[31:27] == 5'b00111;
     assign wren = isStore ? 1'b1 : 1'b0;
+
+    multiCycleInsnSim staller(.instrIn(instrOutXM), .clock(clock), .enable(stallXM), .reset(reset), .instrOut(longInstr), .instrRDY(longInstrRDY));
 
     assign noBypassM = (instrOutXM[31:27] == 5'b00010) |
                        (instrOutXM[31:27] == 5'b00100) | 
@@ -353,9 +361,7 @@ module processor(
     /////////////////
     
 
-
-
-    assign instrInMW = instrOutXM;
+    assign instrInMW = isLoadInMemory ? longInstr : instrOutXM;
 
     // Stall if a MULT or a DIV instruction is currently running
     assign stallMW = multDivOngoing ? 1'b0 : 1'b1;

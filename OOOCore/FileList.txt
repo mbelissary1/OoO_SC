@@ -48,6 +48,7 @@
 ./Processor_2/multdiv_tb.v
 ./Processor_2/multiplier.v
 ./Processor_2/multiply.v
+./Processor_2/multiCycleInsnSim.v
 ./Processor_2/mux_2.v
 ./Processor_2/mux_2_1B.v
 ./Processor_2/mux_2_64B.v
