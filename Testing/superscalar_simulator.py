@@ -109,7 +109,7 @@ while i < len(opcode) - 1:
             target = second_insn_split[2]
             i = int(target) - 1
         else: 
-            second_latency = insn_dict[first_insn]
+            second_latency = insn_dict[second_insn]
             i += 1
     else:
         print("FLUSHING!")
