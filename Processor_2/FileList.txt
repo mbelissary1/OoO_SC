@@ -33,6 +33,7 @@ controller.v
 counter.v
 counter32.v
 decoder.v
+decoderMult.v
 decoder_tb.v
 dffe_ref.v
 divide.v
@@ -42,6 +43,7 @@ interrupt_tb.v
 mult_tb.v
 multdiv.v
 multdiv_tb.v
+multiCycleInsnSim.v
 multiplier.v
 multiply.v
 mux_2.v
@@ -56,6 +58,7 @@ other_tb.v
 processor.v
 reg12.v
 reg32.v
+reg5.v
 reg64.v
 reg65.v
 regfile.v
