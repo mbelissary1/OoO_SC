@@ -1,0 +1,9 @@
+Using the Tool
+
+You are provided with the assembler, asm.cpp, which can be compiled with the following command: g++ -o asm asm.cpp. Once compiled, you should have a new asm executable binary file. The assembler tool takes a “.s” file (file_name.s) as an input and produces one memory file output: file_name.mem. To run the tool, open a terminal session in the same directory as asm and run: ./asm path_to_file/file_name.s
+
+Once you have run the tool and generated the mem file, you can load this file into ROM.v.
+
+The assembler requires specific libraries and dependencies to run properly. We have configured the files so that it should work locally once you have the compiler installed. However, if you have issues, we recommend you run the assembler on a Duke Teer machine. You may need to look into the scp command to transfer files from the remote server to your local machine (and vice versa) if you run the assembler on the Teer machine. This will require you to set up a VPN (link at
+https://oit.duke.edu/what-we-do/services/vpn), and you can connect remotely at: <NETID>@login.oit.duke.edu.
+
