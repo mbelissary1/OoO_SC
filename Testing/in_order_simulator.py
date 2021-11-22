@@ -16,13 +16,8 @@ insn_dict = {
     "'div" : 32,
     "'sw" : 1,
     "'lw" : 8,
-    "'blt" : 1,
-    "'bne" : 1, 
-    "'j"  : 1,
-    "'jal" : 1,
     "'bex" : 1,
     "'setx" : 1,
-    "'jr" : 1
 }
 
 cycles_to_complete = 0
@@ -64,7 +59,7 @@ while i < len(opcode):
                 cycles_to_complete += 1
                 i += 1
     elif "j" in cur_opcode: # j, jal, jr...
-        cycles_to_complete += 1
+        cycles_to_complete += 2
         cur_asm_line = split_asm_file[i + 1].split(" ")
         target = cur_asm_line[2]
         i = int(target) - 1
