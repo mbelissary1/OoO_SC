@@ -1,4 +1,4 @@
-module dffe_ref (q, q_not, d, clk, en, clr);
+module dffe_ref (q, d, clk, en, clr);
    
    //Inputs
    input d, clk, en, clr;
@@ -7,7 +7,7 @@ module dffe_ref (q, q_not, d, clk, en, clr);
    wire clr;
 
    //Output
-   output q, q_not;
+   output q;
    
    //Register
    reg q;
@@ -28,6 +28,4 @@ module dffe_ref (q, q_not, d, clk, en, clr);
            q <= d;
        end
    end
-
-   not q_not(q_not, q);
 endmodule

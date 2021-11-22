@@ -10,22 +10,17 @@ module multdiv(
     output [31:0] data_result;
     output data_exception, data_resultRDY;
 
-    wire[31:0] mult_result, div_result;
-    wire mult_ready, mult_overflow, div_ready, div_overflow, mult_operation, not_mult_operation, next_operation;
-    wire [1:0] ctrl;
+    wire [31:0] data_result_DIV, data_result_MULT;
+    wire data_resultRDY_DIV, data_resultRDY_MULT, data_exception_DIV, data_exception_MULT, isMult;
 
-    assign ctrl[1] = ctrl_DIV;
-    assign ctrl[0] = ctrl_MULT;
-    dffe_ref is_mult_op(mult_operation, not_mult_operation, ctrl_MULT, clock, ctrl_MULT || ctrl_DIV, 1'b0);
+    multiply multi(data_result_MULT, data_operandA, data_operandB, clock, ctrl_MULT, data_resultRDY_MULT, data_exception_MULT);
 
-    booth_mult mult(mult_result, mult_ready, mult_overflow, data_operandA, data_operandB, clock, ctrl_MULT);
-    restoring_div div(div_result, div_ready, div_overflow, data_operandA, data_operandB, clock, ctrl_DIV);
+	divide divi(data_result_DIV, data_operandA, data_operandB, clock, ctrl_DIV, data_resultRDY_DIV, data_exception_DIV);
 
-    assign data_result = mult_operation ? mult_result : div_result;
-    assign data_exception = mult_operation ? mult_overflow : div_overflow;
-    
-    and mult_ready(multRDY, mult_operation, mult_ready);
-    and div_ready(divRDY, ~mult_operation, div_ready);
-    or result_ready(data_resultRDY, divRDY, multRDY);
+    dffe_ref check(isMult, 1'b1, clock, ctrl_MULT, ctrl_DIV);
+
+    mux_2 resultMux(data_result, isMult, data_result_DIV, data_result_MULT);
+    mux_2_1B exceptionMux(data_exception, isMult, data_exception_DIV, data_exception_MULT);
+    mux_2_1B readyMux(data_resultRDY, isMult, data_resultRDY_DIV, data_resultRDY_MULT);
 
 endmodule
